@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SLM-GeoMapper</title>
+
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <div class="panel" id="main-panel">
+      <div id="main-panel-group-container">
+        <div class="main-panel-group">
+          <h1 id="title">SLM GeoMapper</h1>
+          <h3>Map your Straight Line Missions</h3>
+        </div>
+
+        <div class="main-panel-group">
+          <h2>1: Add Start and End Points</h2>
+          <h3>Use Lat, Lon (e.g. 62.6000, 29.7000)</h3>
+          <div class="input-group">
+            <label>Starting point:</label>
+            <input
+              type="text"
+              id="pointA"
+              value="60.73226334289435, 26.97762020997615"
+            />
+          </div>
+          <div class="input-group">
+            <label>End point:</label>
+            <input
+              type="text"
+              id="pointB"
+              value="60.69601789766865, 26.86069480084998"
+            />
+          </div>
+        </div>
+
+        <div class="main-panel-group">
+          <h2>2: Define Deviation Zones</h2>
+          <h3>Radius from optimal path to stay within (meters)</h3>
+          <div class="input-group">
+            <label>Platinum:</label>
+            <input type="number" id="buff1-radius" value="25" />
+          </div>
+          <div class="input-group">
+            <label>Gold:</label>
+            <input type="number" id="buff2-radius" value="50" />
+          </div>
+          <div class="input-group">
+            <label>Silver:</label>
+            <input type="number" id="buff3-radius" value="75" />
+          </div>
+          <div class="input-group">
+            <label>Bronze:</label>
+            <input type="number" id="buff4-radius" value="100" />
+          </div>
+        </div>
+
+        <div class="main-panel-group">
+          <h2>3: Add GPX Data From Mission</h2>
+          <h3>Only .gpx allowed. Maximum of 4 files</h3>
+          <div class="input-group">
+            <input type="file" id="gpxFile1" accept=".gpx" />
+          </div>
+          <div class="input-group">
+            <input type="file" id="gpxFile2" accept=".gpx" />
+          </div>
+          <div class="input-group">
+            <input type="file" id="gpxFile3" accept=".gpx" />
+          </div>
+          <div class="input-group">
+            <input type="file" id="gpxFile4" accept=".gpx" />
+          </div>
+        </div>
+      </div>
+
+      <button id="startBtn">Map Your Mission</button>
+    </div>
+
+    <div class="panel" id="bottom-panel">
+      <div id="minimized-controls">
+        <div id="minimized-control-buttons">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 640 640"
+            id="expandBtn"
+          >
+            <path
+              d="M320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM441 335C450.4 344.4 450.4 359.6 441 368.9C431.6 378.2 416.4 378.3 407.1 368.9L320.1 281.9L233.1 368.9C223.7 378.3 208.5 378.3 199.2 368.9C189.9 359.5 189.8 344.3 199.2 335L303 231C312.4 221.6 327.6 221.6 336.9 231L441 335z"
+            />
+          </svg>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 640 640"
+            id="play-btn"
+          >
+            <path
+              d="M187.2 100.9C174.8 94.1 159.8 94.4 147.6 101.6C135.4 108.8 128 121.9 128 136L128 504C128 518.1 135.5 531.2 147.6 538.4C159.7 545.6 174.8 545.9 187.2 539.1L523.2 355.1C536 348.1 544 334.6 544 320C544 305.4 536 291.9 523.2 284.9L187.2 100.9z"
+            />
+          </svg>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 640 640"
+            id="pause-btn"
+            class="paused"
+          >
+            <path
+              d="M176 96C149.5 96 128 117.5 128 144L128 496C128 522.5 149.5 544 176 544L240 544C266.5 544 288 522.5 288 496L288 144C288 117.5 266.5 96 240 96L176 96zM400 96C373.5 96 352 117.5 352 144L352 496C352 522.5 373.5 544 400 544L464 544C490.5 544 512 522.5 512 496L512 144C512 117.5 490.5 96 464 96L400 96z"
+            />
+          </svg>
+
+          <div class="speed-wrapper">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 640 640"
+              id="speed-selector"
+            >
+              <path
+                d="M83.8 541.6C95.8 546.6 109.5 543.8 118.7 534.7L288 365.3L288 512C288 524.9 295.8 536.6 307.8 541.6C319.8 546.6 333.5 543.8 342.7 534.7L512 365.3L512 512C512 529.7 526.3 544 544 544C561.7 544 576 529.7 576 512L576 128C576 110.3 561.7 96 544 96C526.3 96 512 110.3 512 128L512 274.7L342.6 105.3C333.4 96.1 319.7 93.4 307.7 98.4C295.7 103.4 288 115.1 288 128L288 274.7L118.6 105.4C109.4 96.2 95.7 93.5 83.7 98.5C71.7 103.5 64 115.1 64 128L64 512C64 524.9 71.8 536.6 83.8 541.6z"
+              />
+            </svg>
+            <div class="speed-dropdown">
+              <div class="speed-option active" data-speed="1">1x</div>
+              <div class="speed-option" data-speed="10">10x</div>
+              <div class="speed-option" data-speed="50">50x</div>
+              <div class="speed-option" data-speed="100">100x</div>
+              <div class="speed-option" data-speed="200">200x</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="animator">
+          <input
+            type="range"
+            id="timeSlider"
+            min="0"
+            max="10000"
+            value="0"
+            step="1"
+          />
+        </div>
+      </div>
+
+      <div id="expanded-content">
+        <table id="results-table">
+          <thead>
+            <tr>
+              <th>GPS Track</th>
+              <th>Color</th>
+              <th>Platinum Crosses</th>
+              <th>Gold Crosses</th>
+              <th>Silver Crosses</th>
+              <th>Bronze Crosses</th>
+              <th>Final Score</th>
+            </tr>
+          </thead>
+          <tbody id="results-tbody">
+            <tr>
+              <td
+                colspan="7"
+                style="text-align: center; color: var(--medium-gray)"
+              >
+                Run a mission to see results.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+
+    <script src="script.js"></script>
+  </body>
+</html>
